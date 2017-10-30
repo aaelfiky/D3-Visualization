@@ -1,6 +1,7 @@
 # D3-Visualization
 
 This is a demonstration of how the repo is structured.
+
 **Directories**:-
   - The d3 directory is where the d3 library files are located.
   - The js directory contains:
