@@ -1,26 +1,24 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-	<meta charset="utf-8">
-    <title>D3-Visualization</title>
-    <link rel="stylesheet" type="text/css" href="bootstrap/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
-</head>
-<body>
-    <div class="row">
-        <div class="col-md-5 col-md-offset-1 ">
-            <!-- Bar Chart -->
-            <svg id = "left" width="700" height="360"></svg>
+    <head>
+    	<meta charset="utf-8">
+        <title>D3-Visualization</title>
+        <link rel="stylesheet" type="text/css" href="bootstrap/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+    </head>
+    <body>
+        <div class="row">
+            <div class="col-md-5 col-md-offset-1 ">
+                <!-- Bar Chart -->
+                <svg id = "left" width="700" height="360"></svg>
+            </div>
+            <div class = "col-md-3 col-md-offset-2  ">
+                <!-- Pie Chart -->
+                <div id="chart" width="400"></div>
+            </div>
         </div>
-        <div class = "col-md-3 col-md-offset-2  ">
-            <!-- Pie Chart -->
-            <div id="chart" width="400"></div>
-        </div>
-    </div>
-	
+    </body>
     <script src="d3/d3.min.js"></script>
     <script src="js/jquery.min.js"></script>
     <script src="js/d3-charts.js"></script>
-</body>
 </html>
