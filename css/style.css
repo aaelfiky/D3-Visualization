@@ -1,0 +1,20 @@
+#chart div{
+    padding: 0;
+    text-align:left;
+}
+
+#left{
+    display: inline-block;
+}
+
+.bar {
+    fill: steelblue;
+}
+
+.bar:hover {
+    fill: purple;
+}
+
+.axis--x path {
+    display: block;
+}
