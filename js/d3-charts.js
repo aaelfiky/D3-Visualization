@@ -11,8 +11,8 @@ var g = svg_div.append("g")
 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Pie Chart Variables
-var width_pie = 290;
-var height_pie = 290;
+var width_pie = 270;
+var height_pie = 270;
 var radius = Math.min(width_pie, height_pie) / 2;
 
 var color = d3.scaleOrdinal(d3.schemeCategory20b);
@@ -173,13 +173,12 @@ p.then(function(v) {
     .attr('height', height_pie+30)
     .append('g')
     .attr('transform', 'translate(' + ((width_pie) / 2) +
-    ',' + ((height_pie+35) / 2) + ')');
+    ',' + ((height_pie+60) / 2) + ')');
 
     var arc = d3.arc()
     .innerRadius(0)
     .outerRadius(radius);
-
-    var chart = d3.select('#chart');
+    
 
 
     var pie = d3.pie()

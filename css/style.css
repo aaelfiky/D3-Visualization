@@ -1,6 +1,14 @@
-#chart div{
+#chart div {
     padding: 0;
     text-align:left;
+}
+
+#chart path {
+	stroke: #fff;
+}
+
+#chart path:hover {
+	fill: purple;
 }
 
 #left{
