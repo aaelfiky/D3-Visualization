@@ -20,6 +20,7 @@ var legendSpacing = 4;
 var color = d3.scaleOrdinal()
   .range(['#A60F2B','#528C18', '#FFFF00', '#C3F25C', '#648C85', '#B3F2C9']);
 
+var tooltip_div = d3.select("#chart").append("div").attr("class", "toolTip");
 
 // styling body
 d3.select("body")
@@ -41,6 +42,7 @@ var results = fetch(url)
 
 var p = Promise.resolve(results);
 
+// function where all 100 mutations are handled and the drawing is done
 p.then(function(v) {
     
     var flags = [];  // flags is used to get distinct values
@@ -135,10 +137,6 @@ p.then(function(v) {
     });
 
 
-    // max_count = Math.max(...count_mut);
-    // Array of mutation type & frequency object
-
-    // console.log('MUT_OBJ_ARRAY ' , mut_obj_array);
 
 
     ///// DRAW /////
@@ -147,6 +145,7 @@ p.then(function(v) {
     x.domain(chrom_obj_array.map(function(d) { return d.chrom_type; }));
     y.domain([0, d3.max(chrom_obj_array, function(d) { return d.frequency; })]);
 
+    // adding x-axis
     g.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height + ")")
@@ -159,7 +158,7 @@ p.then(function(v) {
     .attr("text-anchor", "start")
     .text("Chrom").attr("fill","black");
 
-    // 
+    // adding the y-axis
     g.append("g")
     .attr("class", "axis axis--y")
     .call(d3.axisLeft(y).ticks(10), "%")
@@ -171,6 +170,7 @@ p.then(function(v) {
     .text("Frequency").attr("fill","black");
 
 
+    // adding data to bars
     var bar = g.selectAll(".bar")
     .data(chrom_obj_array)
     .enter().append("rect")
@@ -188,32 +188,17 @@ p.then(function(v) {
 
 
 
-/// adding text  // needs improvement
-    // bar.append('text')
-    // .attr("class", "value")
-    // .attr("fill", "white")
-    // .attr("dy", ".3em")
-    // .attr("x", function(d,i) {
-    //     return x(d.chrom_type);
-    // })
-    // .attr("y", function(d,i) {
-    //     return y(d.frequency);
-    // })
-    // .text(function(d){
-    //      return d.frequency;
-    // });
-
-   
-
     // PIE CHART
     var svg = d3.select('#chart')
     .append('svg')
+    .attr('class', 'slice')
     .attr('width', width_pie)
     .attr('height', height_pie+130)
     .append('g')
     .attr('transform', 'translate(' + ((width_pie) / 2) +
     ',' + ((height_pie+60) / 2) + ')');
 
+    // defining inner and outer radius
     var arc = d3.arc()
     .innerRadius(0)
     .outerRadius(radius);
@@ -222,7 +207,8 @@ p.then(function(v) {
     .value(function(d) { return d.frequency; })
     .sort(null);
 
-   
+    
+    // adding data to pie arcs
     var path = svg.selectAll('path')
       .data(pie(type_obj_array))
       .enter()
