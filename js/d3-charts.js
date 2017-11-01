@@ -184,8 +184,7 @@ p.then(function(v) {
     })
     .on("mouseout",function(){
         reset_charts("Update_Pie");
-    });
-
+    }); 
 
 
     // PIE CHART
