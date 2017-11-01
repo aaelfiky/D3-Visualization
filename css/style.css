@@ -12,6 +12,11 @@
 	fill: purple;
 }
 
+/*#chart text {
+    font-size: 16pt;
+    font-family: Arial;
+}   */
+
 .value text{
 	color:white;
 	font-size: 10px;

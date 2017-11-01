@@ -16,7 +16,9 @@ var height_pie = 260;
 var radius = Math.min(width_pie, height_pie) / 2;
 var legendRectSize = 18;
 var legendSpacing = 4;
-var color = d3.scaleOrdinal(d3.schemeCategory20b);
+// var color = d3.scaleOrdinal(d3.schemeCategory20b);
+var color = d3.scaleOrdinal()
+  .range(['#A60F2B','#528C18', '#FFFF00', '#C3F25C', '#648C85', '#B3F2C9']);
 
 
 // styling body
@@ -78,7 +80,7 @@ p.then(function(v) {
         // count_chrom.push(temp_count);
     });
 
-    console.log('Chrom_OBJ : ' , chrom_obj_array);
+    // console.log('Chrom_OBJ : ' , chrom_obj_array);
 
 
     //distinct mut_type
@@ -87,7 +89,7 @@ p.then(function(v) {
         flags[v[i].type] = true;
         distinct_types.push(v[i].type);
     }
-    console.log('TYPES ' , distinct_types);
+    // console.log('TYPES ' , distinct_types);
     distinct_types.forEach(function (item_d,index_d){
         // k item d_m, i index d_m
         temp_count = 0;
@@ -102,7 +104,7 @@ p.then(function(v) {
         };
         type_obj_array.push(type_obj);
     });
-     console.log('TYPE_OBJ ' , type_obj_array);
+     // console.log('TYPE_OBJ ' , type_obj_array);
 
    
 
@@ -113,7 +115,7 @@ p.then(function(v) {
         flags[v[i].mutation] = true;
         distinct_mutations.push(v[i].mutation);
     }
-    console.log('MUTATIONS ' , distinct_mutations);
+    // console.log('MUTATIONS ' , distinct_mutations);
     // count occurences of distinct mutations
     
     
@@ -136,7 +138,7 @@ p.then(function(v) {
     // max_count = Math.max(...count_mut);
     // Array of mutation type & frequency object
 
-    console.log('MUT_OBJ_ARRAY ' , mut_obj_array);
+    // console.log('MUT_OBJ_ARRAY ' , mut_obj_array);
 
 
     ///// DRAW /////
@@ -148,7 +150,14 @@ p.then(function(v) {
     g.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x));
+    .call(d3.axisBottom(x)) //
+    .append("text")
+    .attr("transform", "rotate(0)")
+    .attr("x", 167 *4)
+    .attr("y", 26)
+    .attr("dx", "0.9em")
+    .attr("text-anchor", "start")
+    .text("Chrom").attr("fill","black");
 
     // 
     g.append("g")
@@ -180,19 +189,19 @@ p.then(function(v) {
 
 
 /// adding text  // needs improvement
-    bar.append('text')
-    .attr("class", "value")
-    .attr("fill", "white")
-    .attr("dy", ".3em")
-    .attr("x", function(d,i) {
-        return x(d.chrom_type);
-    })
-    .attr("y", function(d,i) {
-        return y(d.frequency);
-    })
-    .text(function(d){
-         return d.frequency;
-    });
+    // bar.append('text')
+    // .attr("class", "value")
+    // .attr("fill", "white")
+    // .attr("dy", ".3em")
+    // .attr("x", function(d,i) {
+    //     return x(d.chrom_type);
+    // })
+    // .attr("y", function(d,i) {
+    //     return y(d.frequency);
+    // })
+    // .text(function(d){
+    //      return d.frequency;
+    // });
 
    
 
@@ -213,9 +222,7 @@ p.then(function(v) {
     .value(function(d) { return d.frequency; })
     .sort(null);
 
-    // adding a tooltip
-    
-
+   
     var path = svg.selectAll('path')
       .data(pie(type_obj_array))
       .enter()
@@ -236,7 +243,7 @@ p.then(function(v) {
 
      // adding legend
     var legend = svg.selectAll('.legend')                 
-      .data(color.domain())                               
+      .data(pie(type_obj_array))                              
       .enter()                                             
       .append('g')                                         
       .attr('class', 'legend')                            
@@ -251,13 +258,17 @@ p.then(function(v) {
     legend.append('rect')                                     // NEW
     .attr('width', legendRectSize)                          // NEW
     .attr('height', legendRectSize)                         // NEW
-    .style('fill', color)                                   // NEW
-    .style('stroke', color);                                // NEW
+    .style('fill',function(d) {
+        return color(d.data.type_atr);
+      })                                 // NEW
+    .style('stroke',function(d) {
+        return color(d.data.type_atr);
+      });                               // NEW
 
     legend.append('text')                                     // NEW
     .attr('x', legendRectSize + legendSpacing+5)              // NEW
     .attr('y', legendRectSize - legendSpacing)  
-    .text(function(d) { return d; });  
+    .text(function(d) { return d.data.type_atr; });  
 
     // reset function
     var reset_charts = function(update){
@@ -304,7 +315,6 @@ p.then(function(v) {
         }
     };
 
-
     // update function
     var update_charts = function(update,data){
 
@@ -337,12 +347,12 @@ p.then(function(v) {
             new_data.push(temp_obj);
         });
         
-        
         var bars_new = g.selectAll(".bar")
                         .remove()
                         .exit()
                         .data(new_data);
 
+       
         bars_new.enter().append("rect")
             .attr("class", "bar")
             .attr("x", function(d) { return x(d.chrom_type); })
@@ -350,7 +360,7 @@ p.then(function(v) {
             .attr("width", x.bandwidth())
             .attr("height", function(d) { return height - y(d.frequency); });
 
-    }
+    };
 
     var update_pie = function(data){
         
@@ -382,8 +392,9 @@ p.then(function(v) {
         .attr('fill', function(d) {
             return color(d.data.type_atr);
         });
+
     };
 
-    console.log("DATASET",v);
+    // console.log("DATASET",v);
 });
 
