@@ -11,10 +11,11 @@ var g = svg_div.append("g")
 .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Pie Chart Variables
-var width_pie = 270;
-var height_pie = 270;
+var width_pie = 260;
+var height_pie = 260;
 var radius = Math.min(width_pie, height_pie) / 2;
-
+var legendRectSize = 18;
+var legendSpacing = 4;
 var color = d3.scaleOrdinal(d3.schemeCategory20b);
 
 
@@ -48,12 +49,18 @@ p.then(function(v) {
     var mut_obj_array = []; // mutation details & frequency object array
     var chrom_obj_array = []; // chromosomes types & frequency object array
     var type_obj_array = []; // mutation type & frequency object array
-
+    
     // array of chromosomes
     var chrom = ["1","2","3","4","5","6","7","8","9","10","11","12","13", "14","15","16","17","18","19","20","21","22", "X", "Y"];
 
     // array of types
     var distinct_types = [];
+
+    // the following variables are used in the update_charts functions
+    var ctr_i;
+    var new_data = [];
+    var temp_ctr;
+    var temp_obj;
 
     chrom.forEach(function (item_d,index_d){
         // k item d_m, i index d_m
@@ -155,22 +162,45 @@ p.then(function(v) {
     .text("Frequency").attr("fill","black");
 
 
-    g.selectAll(".bar")
+    var bar = g.selectAll(".bar")
     .data(chrom_obj_array)
     .enter().append("rect")
     .attr("class", "bar")
     .attr("x", function(d) { return x(d.chrom_type); })
     .attr("y", function(d) { return y(d.frequency); })
     .attr("width", x.bandwidth())
-    .attr("height", function(d) { return height - y(d.frequency); });
-    
+    .attr("height", function(d) { return height - y(d.frequency); })
+    .on("mouseover",function(d){
+        update_charts("Update_Pie",d.chrom_type);
+    })
+    .on("mouseout",function(){
+        reset_charts("Update_Pie");
+    });
 
+
+
+/// adding text  // needs improvement
+    bar.append('text')
+    .attr("class", "value")
+    .attr("fill", "white")
+    .attr("dy", ".3em")
+    .attr("x", function(d,i) {
+        return x(d.chrom_type);
+    })
+    .attr("y", function(d,i) {
+        return y(d.frequency);
+    })
+    .text(function(d){
+         return d.frequency;
+    });
+
+   
 
     // PIE CHART
     var svg = d3.select('#chart')
     .append('svg')
     .attr('width', width_pie)
-    .attr('height', height_pie+30)
+    .attr('height', height_pie+130)
     .append('g')
     .attr('transform', 'translate(' + ((width_pie) / 2) +
     ',' + ((height_pie+60) / 2) + ')');
@@ -178,12 +208,13 @@ p.then(function(v) {
     var arc = d3.arc()
     .innerRadius(0)
     .outerRadius(radius);
-    
-
 
     var pie = d3.pie()
     .value(function(d) { return d.frequency; })
     .sort(null);
+
+    // adding a tooltip
+    
 
     var path = svg.selectAll('path')
       .data(pie(type_obj_array))
@@ -192,8 +223,166 @@ p.then(function(v) {
       .attr('d', arc)
       .attr('fill', function(d) {
         return color(d.data.type_atr);
+      })
+      .on("mouseover",function(d){
+        // draw_tooltip(d.data);
+        update_charts("Update_Bar",d.data.type_atr);
+      })
+      .on("mouseout",function(){
+        // remove_tooltip();
+        reset_charts("Update_Bar");
       });
 
+
+     // adding legend
+    var legend = svg.selectAll('.legend')                 
+      .data(color.domain())                               
+      .enter()                                             
+      .append('g')                                         
+      .attr('class', 'legend')                            
+      .attr('transform', function(d, i) {               
+        var height = legendRectSize + legendSpacing;       
+        var offset =  (-4.5)*height * color.domain().length / 2;
+        var horz = -2 * legendRectSize*(2);                       // NEW
+        var vert = i * height - offset;                       // NEW
+        return 'translate(' + horz + ',' + vert + ')';        // NEW
+      });
+
+    legend.append('rect')                                     // NEW
+    .attr('width', legendRectSize)                          // NEW
+    .attr('height', legendRectSize)                         // NEW
+    .style('fill', color)                                   // NEW
+    .style('stroke', color);                                // NEW
+
+    legend.append('text')                                     // NEW
+    .attr('x', legendRectSize + legendSpacing+5)              // NEW
+    .attr('y', legendRectSize - legendSpacing)  
+    .text(function(d) { return d; });  
+
+    // reset function
+    var reset_charts = function(update){
+        var bars_rst;
+        var pie_rst;
+        if(update === "Update_Bar"){
+            bars_rst = g.selectAll(".bar")
+                        .remove()
+                        .exit()
+                        .data(chrom_obj_array);
+            bars_rst.enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return x(d.chrom_type); })
+            .attr("y", function(d) { return y(d.frequency); })
+            .attr("width", x.bandwidth())
+            .attr("height", function(d) { return height - y(d.frequency); })
+            .on("mouseover",function(d){
+                update_charts("Update_Pie",d.chrom_type);
+            })
+            .on("mouseout",function(){
+                reset_charts("Update_Pie");
+            });
+        }
+        if(update === "Update_Pie"){
+            pie_rst = svg.selectAll("path")
+                        .remove()
+                        .exit()
+                        .data(pie(type_obj_array));
+            pie_rst.enter()
+            .append('path')
+            .attr('d', arc)
+            .attr('fill', function(d) {
+                return color(d.data.type_atr);
+            })
+            .on("mouseover",function(d){
+            // draw_tooltip(d.data);
+                update_charts("Update_Bar",d.data.type_atr);
+            })
+            .on("mouseout",function(){
+            // remove_tooltip();
+                reset_charts("Update_Bar");
+            });
+        }
+    };
+
+
+    // update function
+    var update_charts = function(update,data){
+
+        if(update === "Update_Bar"){
+            update_bar(data);
+        }
+        if(update === "Update_Pie"){
+            update_pie(data);
+        }
+    };
+
+    var update_bar = function(data){
+
+        new_data = [];
+        chrom_obj_array.forEach( function (item_d,index_d){
+            temp_ctr = 0;
+            for (ctr_i = 0; ctr_i < v.length; ctr_i++) {
+                var current = v[ctr_i];
+                var chrom_t = item_d.chrom_type;
+                
+
+                if (data === current.type &&  chrom_t === current.chromosome ){
+                    temp_ctr += 1;
+                }
+            }
+            temp_obj = {
+                chrom_type : chrom_t,
+                frequency  : temp_ctr
+                };
+            new_data.push(temp_obj);
+        });
+        
+        
+        var bars_new = g.selectAll(".bar")
+                        .remove()
+                        .exit()
+                        .data(new_data);
+
+        bars_new.enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return x(d.chrom_type); })
+            .attr("y", function(d) { return y(d.frequency); })
+            .attr("width", x.bandwidth())
+            .attr("height", function(d) { return height - y(d.frequency); });
+
+    }
+
+    var update_pie = function(data){
+        
+        new_data = [];
+        type_obj_array.forEach(function(item_d, index_d){
+            temp_ctr = 0;
+            for (ctr_i = 0; ctr_i < v.length; ctr_i++) {
+                var current = v[ctr_i];
+                var mutation_t = item_d.type_atr;
+                
+
+                if (data === current.chromosome &&  mutation_t === current.type ){
+                    temp_ctr += 1;
+                }
+            }
+            temp_obj = {
+                type_atr : mutation_t,
+                frequency  : temp_ctr
+                };
+            new_data.push(temp_obj);
+        });
+        var new_pie = svg.selectAll('path')
+                    .remove()
+                    .exit()
+                    .data(pie(new_data));
+        new_pie.enter()
+        .append('path')
+        .attr('d', arc)
+        .attr('fill', function(d) {
+            return color(d.data.type_atr);
+        });
+    };
 
     console.log("DATASET",v);
 });

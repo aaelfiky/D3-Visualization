@@ -1,5 +1,6 @@
 #chart div {
     padding: 0;
+    position: relative;
     text-align:left;
 }
 
@@ -9,6 +10,11 @@
 
 #chart path:hover {
 	fill: purple;
+}
+
+.value text{
+	color:white;
+	font-size: 10px;
 }
 
 #left{
